@@ -14,7 +14,7 @@ def setup_schema(connection_string):
 def load_stock_data(connection_string, stock_data_filename):
     conn = psycopg2.connect(connection_string)
     cursor = conn.cursor()
-    with open('datasets/historical_stock_prices.csv', 'r') as stock_price_file:
+    with open(stock_data_filename, 'r') as stock_price_file:
         for line in stock_price_file:
             line_elements = line.split(',')
             print(line_elements)
