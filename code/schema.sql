@@ -1,15 +1,15 @@
 DROP SCHEMA IF EXISTS stocks CASCADE;
 CREATE SCHEMA stocks;
-DROP TABLE IF EXISTS company_information;
-DROP TABLE IF EXISTS historical_stock_prices;
+DROP TABLE IF EXISTS historical_stock_prices CASCADE;
+DROP TABLE IF EXISTS company_information CASCADE;
 
 CREATE TABLE company_information(
-	ticker VARCHAR(7),
-	exchange VARCHAR(7),
-	name VARCHAR(127),
-	sector VARCHAR(127),
-	industry VARCHAR(127),
-	PRIMARY KEY(ticker)
+    ticker VARCHAR(7),
+    exchange VARCHAR(7),
+    name VARCHAR(127),
+    sector VARCHAR(127),
+    industry VARCHAR(127),
+    PRIMARY KEY(ticker)
 );
 
 CREATE TABLE historical_stock_prices(

@@ -1,4 +1,5 @@
 import psycopg2
+import setup
 
 connection_string = "host='localhost' dbname='dbms_final_project' user='dbms_project_user' password='dbms_password'"
 
@@ -7,15 +8,8 @@ connection_string = "host='localhost' dbname='dbms_final_project' user='dbms_pro
 
 def main():
     # TODO invoke your code to load the data into the database
-    print("Loading data")
-    conn = psycopg2.connect(connection_string)
-    print ("Connection established")
-    cursor = conn.cursor()
-    print("Cursor created")
-    with open('schema.sql', 'r') as schema:
-    	setup_queries = schema.read()
-    	cursor.execute(setup_queries)
-    	conn.commit()
+    setup.setup_schema(connection_string)
+    print ("Schema initialized.")
 
 if __name__ == "__main__":
     main()
