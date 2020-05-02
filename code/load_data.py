@@ -7,9 +7,10 @@ connection_string = "host='localhost' dbname='dbms_final_project' user='dbms_pro
 
 
 def main():
-    # TODO invoke your code to load the data into the database
-    setup.setup_schema(connection_string)
-    print ("Schema initialized")
-
+	# TODO invoke your code to load the data into the database
+	setup.setup_schema(connection_string)
+	print ("Schema initialized")
+	# setup.load_attack_data(connection_string, 'globalterrorismdb_0718dist.csv')
+	
 if __name__ == "__main__":
     main()
