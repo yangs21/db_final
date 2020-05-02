@@ -11,6 +11,7 @@ def setup_schema(connection_string):
         cursor.execute(setup_queries)
         conn.commit()
 
+<<<<<<< HEAD
 def load_historical_stock_data(connection_string, stock_data_filename):
     conn = psycopg2.connect(connection_string)
     cursor = conn.cursor()
@@ -47,3 +48,11 @@ def load_company_information(connection_string, company_info_filename):
             {'ticker': line_elements[0], 'exchange': line_elements[1], 'name': line_elements[2], \
             'sector': line_elements[3], 'industry': line_elements[4] })
         conn.commit()
+			
+def load_attack_data(connection_string, attack_data_filename):
+	conn = psycopg2.connect(connection_string)
+	cursor = conn.cursor()
+	with open('datasets/' + attack_data_filename, 'r') as attack_file:
+		for line in attack_file:
+			line_elements = line.split(',')
+			print(line_elements)

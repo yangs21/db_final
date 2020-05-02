@@ -1,2 +1,2 @@
-code/datasets
-code/__pycache__
+/code/datasets/*
+/code/__pycache__
