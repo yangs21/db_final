@@ -1,5 +1,5 @@
-DROP SCHEMA IF EXISTS stocks CASCADE;
-CREATE SCHEMA stocks;
+DROP SCHEMA IF EXISTS stocks_and_attacks CASCADE;
+CREATE SCHEMA stocks_and_attacks;
 DROP TABLE IF EXISTS historical_stock_prices CASCADE;
 DROP TABLE IF EXISTS company_information CASCADE;
 DROP TABLE IF EXISTS attacks CASCADE;
