@@ -9,7 +9,7 @@ connection_string = "host='localhost' dbname='dbms_final_project' user='dbms_pro
 def main():
     # TODO invoke your code to load the data into the database
     setup.setup_schema(connection_string)
-    print ("Schema initialized.")
+    print ("Schema initialized")
 
 if __name__ == "__main__":
     main()
