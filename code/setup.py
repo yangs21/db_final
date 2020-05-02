@@ -12,7 +12,6 @@ def setup_schema(connection_string):
         conn.commit()
 
 def load_stock_data(connection_string, stock_data_filename):
-<<<<<<< HEAD
 	conn = psycopg2.connect(connection_string)
 	cursor = conn.cursor()
 	with open('datasets/historical_stock_prices.csv', 'r') as stock_price_file:
@@ -27,11 +26,3 @@ def load_attack_data(connection_string, attack_data_filename):
 		for line in attack_file:
 			line_elements = line.split(',')
 			print(line_elements)
-=======
-    conn = psycopg2.connect(connection_string)
-    cursor = conn.cursor()
-    with open(stock_data_filename, 'r') as stock_price_file:
-        for line in stock_price_file:
-            line_elements = line.split(',')
-            print(line_elements)
->>>>>>> 639331007c2fca725003a3ab6bcd4c417ef83ad8
