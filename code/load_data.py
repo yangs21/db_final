@@ -10,7 +10,11 @@ def main():
     # TODO invoke your code to load the data into the database
     setup.setup_schema(connection_string)
     print ("Schema initialized")
-    setup.load_stock_data(connection_string, "datasets/historical_stock_prices.csv")
+    print("Loading company information data")
+    setup.load_company_information(connection_string, "datasets/historical_stocks.csv")
+    print ("Company information data successfully loaded. Loading historical stock price data")
+    setup.load_historical_stock_data(connection_string, "datasets/historical_stock_prices.csv")
+    print ("Historical stock price data successfully loaded")
 
 if __name__ == "__main__":
     main()

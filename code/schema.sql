@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS attack_location CASCADE;
 DROP TABLE IF EXISTS attack_data CASCADE;
 
 CREATE TABLE company_information(
-    ticker VARCHAR(7),
-    exchange VARCHAR(7),
+    ticker VARCHAR(15),
+    exchange VARCHAR(31),
     name VARCHAR(127),
     sector VARCHAR(127),
     industry VARCHAR(127),
@@ -16,12 +16,12 @@ CREATE TABLE company_information(
 );
 
 CREATE TABLE historical_stock_prices(
-    ticker VARCHAR(7) REFERENCES company_information(ticker),
-    open NUMERIC(4, 2),
-    close NUMERIC(4, 2),
-    adj_close NUMERIC(4, 2),
-    low NUMERIC(4, 2),
-    high NUMERIC(4, 2),
+    ticker VARCHAR(15) references company_information(ticker),
+    open NUMERIC(15, 2),
+    close NUMERIC(15, 2),
+    adj_close NUMERIC(15, 2),
+    low NUMERIC(15, 2),
+    high NUMERIC(15, 2),
     volume BIGINT,
     trade_date DATE,
     PRIMARY KEY(ticker, trade_date)
