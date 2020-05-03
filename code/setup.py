@@ -70,7 +70,6 @@ def attacks_query(line):
     summary = line[18]
     if len(summary) > 511:
         summary = None
-    success = True
     if int(year) > cutoff_date:
         return None
     return ("INSERT INTO attacks VALUES("\
@@ -85,7 +84,7 @@ def attacks_query(line):
 
 def attack_location_query(line):
     year = line[1].zfill(4)
-    if int(year) > 1982:
+    if int(year) > cutoff_date:
         return None
     return ("INSERT INTO attack_location VALUES("\
                 "%(id)s, "\
