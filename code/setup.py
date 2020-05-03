@@ -6,6 +6,7 @@ import threading
 path = os.path.dirname(os.path.realpath(__file__))
 progress = None
 progress_timer_thread = None
+cutoff_date = 1990
 
 def setup_schema(connection_string):
     print("Loading data")
@@ -34,6 +35,11 @@ def company_information_query(line):
             })
 
 def historical_stock_prices_query(line):
+    dateTotal = line[7]
+    separatedDates = dateTotal.split('-')
+    year = separatedDates[0]
+    if int(year) > cutoff_date:
+        return None
     return ("INSERT INTO historical_stock_prices VALUES("\
                 "%(ticker)s, "\
                 "%(open)s, "\
@@ -64,6 +70,9 @@ def attacks_query(line):
     summary = line[18]
     if len(summary) > 511:
         summary = None
+    success = True
+    if int(year) > cutoff_date:
+        return None
     return ("INSERT INTO attacks VALUES("\
                 "%(id)s, "\
                 "%(date)s, "\
@@ -75,6 +84,9 @@ def attacks_query(line):
             })
 
 def attack_location_query(line):
+    year = line[1].zfill(4)
+    if int(year) > 1982:
+        return None
     return ("INSERT INTO attack_location VALUES("\
                 "%(id)s, "\
                 "%(country)s, "\
@@ -90,6 +102,9 @@ def attack_location_query(line):
             })
 
 def attack_data_query(line):
+    year = line[1].zfill(4)
+    if int(year) > cutoff_date:
+        return None
     number_killed = line[98]
     if number_killed == '':
         number_killed = None
@@ -139,7 +154,9 @@ def load_file(connection_string, query_factories, filename, encoding='utf_8'):
                 continue
             for factory in query_factories:
                 query = factory(line)
+                if query == None:
+                    break
                 cursor.execute(query[0], query[1])
-                conn.commit()
+        conn.commit()
         if progress_timer_thread is not None:
             progress_timer_thread.cancel()
