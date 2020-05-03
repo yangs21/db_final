@@ -16,25 +16,25 @@ CREATE TABLE company_information(
 );
 
 CREATE TABLE historical_stock_prices(
-    ticker VARCHAR(15) references company_information(ticker),
-    open NUMERIC(15, 2),
-    close NUMERIC(15, 2),
-    adj_close NUMERIC(15, 2),
-    low NUMERIC(15, 2),
-    high NUMERIC(15, 2),
+    ticker VARCHAR(15) REFERENCES company_information(ticker),
+    open NUMERIC(31, 2),
+    close NUMERIC(31, 2),
+    adj_close NUMERIC(31, 2),
+    low NUMERIC(31, 2),
+    high NUMERIC(31, 2),
     volume BIGINT,
     trade_date DATE,
     PRIMARY KEY(ticker, trade_date)
 );
 
 CREATE TABLE attacks (
-	attackID INTEGER,
+	attackID BIGINT PRIMARY KEY,
 	date DATE,
 	summary VARCHAR(511)
 );
 
 CREATE TABLE attack_location (
-	attackID INTEGER,
+	attackID BIGINT PRIMARY KEY REFERENCES attacks(attackID),
 	country VARCHAR(255),
 	region VARCHAR(255),
 	provstate VARCHAR(255),
@@ -42,11 +42,13 @@ CREATE TABLE attack_location (
 );
 
 CREATE TABLE attack_data (
-	attackID INTEGER,
+	attackID BIGINT PRIMARY KEY REFERENCES attacks(attackID),
 	extended BOOLEAN,
 	multiple BOOLEAN,
 	success BOOLEAN,
 	suicide BOOLEAN,
-	numberKilled INTEGER,
-	numberKilledUS INTEGER
+    attack_type VARCHAR(255),
+    target_type VARCHAR(255),
+    target_nationality VARCHAR(255),
+    number_killed INTEGER
 );

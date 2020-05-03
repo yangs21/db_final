@@ -1,1 +1,5 @@
+csv
+os
+psycopg2
+threading
 wget
