@@ -1,10 +1,11 @@
 import psycopg2
+import psycopg2.extras
 import os
 import csv
 import threading
 
 path = os.path.dirname(os.path.realpath(__file__))
-progress = None
+parsed = None
 progress_timer_thread = None
 cutoff_date = 1990
 
@@ -38,8 +39,18 @@ def historical_stock_prices_query(line):
     dateTotal = line[7]
     separatedDates = dateTotal.split('-')
     year = separatedDates[0]
+    data = {
+                'ticker': line[0],\
+                'open': line[1],\
+                'close': line[2],\
+                'adj_close': line[3],\
+                'low': line[4],\
+                'high': line[5],\
+                'volume': line[6],\
+                'trade_date': line[7]
+            }
     if int(year) > cutoff_date:
-        return None
+        data = None
     return ("INSERT INTO historical_stock_prices VALUES("\
                 "%(ticker)s, "\
                 "%(open)s, "\
@@ -49,16 +60,7 @@ def historical_stock_prices_query(line):
                 "%(high)s, "\
                 "%(volume)s, "\
                 "%(trade_date)s);",
-            {
-                'ticker': line[0],\
-                'open': line[1],\
-                'close': line[2],\
-                'adj_close': line[3],\
-                'low': line[4],\
-                'high': line[5],\
-                'volume': line[6],\
-                'trade_date': line[7]
-            })
+            data)
 
 def attacks_query(line):
     year = line[1].zfill(4)
@@ -70,43 +72,56 @@ def attacks_query(line):
     summary = line[18]
     if len(summary) > 511:
         summary = None
+    data = {
+                'id': line[0],\
+                'date':  date,\
+                'summary': summary
+            }
     if int(year) > cutoff_date:
-        return None
+        data = None
     return ("INSERT INTO attacks VALUES("\
                 "%(id)s, "\
                 "%(date)s, "\
                 "%(summary)s);",
-            {
-                'id': line[0],\
-                'date':  date,\
-                'summary': summary
-            })
+            data)
 
 def attack_location_query(line):
     year = line[1].zfill(4)
+    data = {
+                'id': line[0],\
+                'country': line[8],\
+                'region': line[10],\
+                'provstate': line[11],\
+                'city': line[12]
+            }
     if int(year) > cutoff_date:
-        return None
+        data = None
     return ("INSERT INTO attack_location VALUES("\
                 "%(id)s, "\
                 "%(country)s, "\
                 "%(region)s, "\
                 "%(provstate)s, "\
                 "%(city)s);",
-            {
-                'id': line[0],\
-                'country': line[8],\
-                'region': line[10],\
-                'provstate': line[11],\
-                'city': line[12]
-            })
+            data)
 
 def attack_data_query(line):
     year = line[1].zfill(4)
-    if int(year) > cutoff_date:
-        return None
     number_killed = line[98]
     if number_killed == '':
         number_killed = None
+    data = {
+                'id': line[0],\
+                'extended': line[5],\
+                'multiple': line[25],\
+                'success': line[26],\
+                'suicide': line[27],\
+                'attack_type': line[29],\
+                'target_type': line[35],\
+                'target_nationality': line[41],\
+                'number_killed': number_killed
+            }
+    if int(year) > cutoff_date:
+        data = None
     return ("INSERT INTO attack_data VALUES("\
                 "%(id)s, "\
                 "%(extended)s, "\
@@ -117,45 +132,45 @@ def attack_data_query(line):
                 "%(target_type)s, "\
                 "%(target_nationality)s, "\
                 "%(number_killed)s);",
-            {
-                'id': line[0],\
-                'extended': line[5],\
-                'multiple': line[25],\
-                'success': line[26],\
-                'suicide': line[27],\
-                'attack_type': line[29],\
-                'target_type': line[35],\
-                'target_nationality': line[41],\
-                'number_killed': number_killed
-            })
+            data)
 
 def print_progress():
-    global progress
+    global parsed
     global progress_timer_thread
-    if progress is not None:
-        print("{} rows inserted".format(progress))
+    if parsed is not None:
+        print("{} rows parsed".format(parsed))
     progress_timer_thread = threading.Timer(5.0, print_progress)
     progress_timer_thread.start()
 
 def load_file(connection_string, query_factories, filename, encoding='utf_8'):
-    global progress
+    global parsed
+    global loaded
     global progress_timer_thread
+    parsed = None
+    loaded = None
     conn = psycopg2.connect(connection_string)
     cursor = conn.cursor()
     with open(os.path.join(path, 'datasets', filename), 'r', encoding=encoding) as file:
         reader = csv.reader(file)
         skip_first_line = True
+        queries = {}
+        for f_idx, factory in enumerate(query_factories):
+            queries[f_idx] = []
         print_progress()
         for idx, line in enumerate(reader):
-            progress = idx
+            parsed = idx
             if skip_first_line:
                 skip_first_line = False
                 continue
-            for factory in query_factories:
+            for f_idx, factory in enumerate(query_factories):
                 query = factory(line)
-                if query == None:
+                if query[1] == None:
                     break
-                cursor.execute(query[0], query[1])
+                queries[f_idx].append(query[1])
+                if len(queries[f_idx]) > 50000:
+                    psycopg2.extras.execute_batch(cursor, query[0], queries[f_idx])
+                    queries[f_idx] = []
+        psycopg2.extras.execute_batch(cursor, query[0], queries[f_idx])
         conn.commit()
         if progress_timer_thread is not None:
             progress_timer_thread.cancel()
