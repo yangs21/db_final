@@ -21,35 +21,43 @@ def setup_schema(connection_string):
         conn.commit()
 
 def company_information_query(line):
+    if line:
+        data = {
+                'ticker': line[0],\
+                'exchange': line[1],\
+                'name': line[2],\
+                'sector': line[3],\
+                'industry': line[4]
+            }
+    else:
+        data = None
     return ("INSERT INTO company_information VALUES("\
                 "%(ticker)s, "\
                 "%(exchange)s, "\
                 "%(name)s, "\
                 "%(sector)s, "\
                 "%(industry)s);",
-            {
-                'ticker': line[0],\
-                'exchange': line[1],\
-                'name': line[2],\
-                'sector': line[3],\
-                'industry': line[4]
-            })
+            data)
 
 def historical_stock_prices_query(line):
-    dateTotal = line[7]
-    separatedDates = dateTotal.split('-')
-    year = separatedDates[0]
-    data = {
-                'ticker': line[0],\
-                'open': line[1],\
-                'close': line[2],\
-                'adj_close': line[3],\
-                'low': line[4],\
-                'high': line[5],\
-                'volume': line[6],\
-                'trade_date': line[7]
-            }
-    if int(year) > cutoff_date:
+    global cutoff_date
+    if line:
+        dateTotal = line[7]
+        separatedDates = dateTotal.split('-')
+        year = separatedDates[0]
+        data = {
+                    'ticker': line[0],\
+                    'open': line[1],\
+                    'close': line[2],\
+                    'adj_close': line[3],\
+                    'low': line[4],\
+                    'high': line[5],\
+                    'volume': line[6],\
+                    'trade_date': line[7]
+                }
+        if int(year) > cutoff_date:
+            data = None
+    else:
         data = None
     return ("INSERT INTO historical_stock_prices VALUES("\
                 "%(ticker)s, "\
@@ -63,21 +71,25 @@ def historical_stock_prices_query(line):
             data)
 
 def attacks_query(line):
-    year = line[1].zfill(4)
-    month = line[2].zfill(2)
-    day = line[3].zfill(2)
-    date = '-'.join([year, month, day])
-    if year == '0000' or month == '00' or day == '00':
-        date = None
-    summary = line[18]
-    if len(summary) > 511:
-        summary = None
-    data = {
-                'id': line[0],\
-                'date':  date,\
-                'summary': summary
-            }
-    if int(year) > cutoff_date:
+    global cutoff_date
+    if line:
+        year = line[1].zfill(4)
+        month = line[2].zfill(2)
+        day = line[3].zfill(2)
+        date = '-'.join([year, month, day])
+        if year == '0000' or month == '00' or day == '00':
+            date = None
+        summary = line[18]
+        if len(summary) > 511:
+            summary = None
+        data = {
+                    'id': line[0],\
+                    'date':  date,\
+                    'summary': summary
+                }
+        if int(year) > cutoff_date:
+            data = None
+    else:
         data = None
     return ("INSERT INTO attacks VALUES("\
                 "%(id)s, "\
@@ -86,16 +98,21 @@ def attacks_query(line):
             data)
 
 def attack_location_query(line):
-    year = line[1].zfill(4)
-    data = {
-                'id': line[0],\
-                'country': line[8],\
-                'region': line[10],\
-                'provstate': line[11],\
-                'city': line[12]
-            }
-    if int(year) > cutoff_date:
+    global cutoff_date
+    if line:
+        year = line[1].zfill(4)
+        data = {
+                    'id': line[0],\
+                    'country': line[8],\
+                    'region': line[10],\
+                    'provstate': line[11],\
+                    'city': line[12]
+                }
+        if int(year) > cutoff_date:
+            data = None
+    else:
         data = None
+    # print(data)
     return ("INSERT INTO attack_location VALUES("\
                 "%(id)s, "\
                 "%(country)s, "\
@@ -105,23 +122,28 @@ def attack_location_query(line):
             data)
 
 def attack_data_query(line):
-    year = line[1].zfill(4)
-    number_killed = line[98]
-    if number_killed == '':
-        number_killed = None
-    data = {
-                'id': line[0],\
-                'extended': line[5],\
-                'multiple': line[25],\
-                'success': line[26],\
-                'suicide': line[27],\
-                'attack_type': line[29],\
-                'target_type': line[35],\
-                'target_nationality': line[41],\
-                'number_killed': number_killed
-            }
-    if int(year) > cutoff_date:
+    global cutoff_date
+    if line:
+        year = line[1].zfill(4)
+        number_killed = line[98]
+        if number_killed == '':
+            number_killed = None
+        data = {
+                    'id': line[0],\
+                    'extended': line[5],\
+                    'multiple': line[25],\
+                    'success': line[26],\
+                    'suicide': line[27],\
+                    'attack_type': line[29],\
+                    'target_type': line[35],\
+                    'target_nationality': line[41],\
+                    'number_killed': number_killed
+                }
+        if int(year) > cutoff_date:
+            data = None
+    else: 
         data = None
+    # print(data)
     return ("INSERT INTO attack_data VALUES("\
                 "%(id)s, "\
                 "%(extended)s, "\
@@ -170,7 +192,8 @@ def load_file(connection_string, query_factories, filename, encoding='utf_8'):
                 if len(queries[f_idx]) > 50000:
                     psycopg2.extras.execute_batch(cursor, query[0], queries[f_idx])
                     queries[f_idx] = []
-        psycopg2.extras.execute_batch(cursor, query[0], queries[f_idx])
+        for f_idx, factory in enumerate(query_factories):
+            psycopg2.extras.execute_batch(cursor, factory('')[0], queries[f_idx])
         conn.commit()
         if progress_timer_thread is not None:
             progress_timer_thread.cancel()
