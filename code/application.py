@@ -136,7 +136,7 @@ def plot_nasdaq_US_attack(conn, month, us_attack, nasdaq):
     ax2 = ax1.twinx()
     ax2.xaxis.set_major_locator(months)
     ax2.xaxis.set_major_formatter(monthsFmt)
-
+    
     plt.plot(month, nasdaq, label ='NASDAQ Volume Weighted Average Price (VWAP)', color='paleturquoise')
     plt.legend()
     ax2.set_xlabel('Month')
@@ -266,6 +266,7 @@ def main():
     month = [r[0] for r in nasdaq_year(conn, year_start, year_end)]
     us_attack = [r[2] for r in count_US_attack(conn, year_start, year_end)]
     plot_nasdaq_US_attack(conn, month, us_attack, nasdaq)
+
     print("Close graph to continue")
     input('Hit keyboard to continue => ')
 
